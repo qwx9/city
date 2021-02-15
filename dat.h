@@ -40,6 +40,7 @@ struct Resource{
 	char *name;
 	int goods[Gtot];
 };
+extern Resource resources[Rtot];
 
 enum{
 	Btownhall,
@@ -86,8 +87,8 @@ extern Terrain terrains[Ttot];
 
 enum{
 	Snull,
-	Swait,
 	Sbuild,
+	Swait,
 	Sproduce,
 };
 struct Tile{
