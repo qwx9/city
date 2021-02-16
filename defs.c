@@ -100,86 +100,96 @@ Resource resources[] = {
 Building buildings[] = {
 	[Btownhall]{
 		.name "townhall",
-		.time 0,
 		.buildtime 1000,
-		.costs {0},
+		.buildcost {0},
 		.terrain Tplain,
-		.goods {0},
+		.prodtime 0,
+		.product {0},
+		.prodcost {0},
+		.upkeep {
+			[Rfood] 1,
+		},
+	},[Bfishyard]{
+		.name "fishyard",
+		.buildtime 50,
+		.buildcost {
+			[Ggold] 5,
+			[Gwood] 5,
+		},
+		.terrain Tpond,
+		.prodtime 25,
+		.product {
+			[Gfish] 1,
+		},
+		.prodcost {0},
 		.upkeep {
 			[Rfood] 1,
 		},
 	},[Bcarpentry]{
 		.name "carpentry",
-		.time 25,
 		.buildtime 50,
-		.costs {
+		.buildcost {
 			[Ggold] 3,
 			[Gwood] 3,
 		},
 		.terrain Tplain,
-		.goods {
+		.prodtime 25,
+		.product {
 			[Gwood] 1,
 		},
+		.prodcost {0},
 		.upkeep {
 			[Rfood] 1,
 		},
 	},[Bsawmill]{
 		.name "sawmill",
-		.time 25,
 		.buildtime 50,
-		.costs {
+		.buildcost {
 			[Ggold] 10,
 			[Gwood] 10,
 		},
 		.terrain Tplain,
-		.goods {
+		.prodtime 50,
+		.product {
 			[Glumber] 1,
+		},
+		.prodcost {
+			[Gwood] 1,
 		},
 		.upkeep {
 			[Rfood] 2,
 		},
-	},[Bfishyard]{
-		.name "fishyard",
-		.time 25,
-		.buildtime 50,
-		.costs {
-			[Ggold] 5,
-			[Gwood] 5,
-		},
-		.terrain Tpond,
-		.goods {
-			[Gfish] 1,
-		},
-		.upkeep {
-			[Rfood] 1,
-		},
 	},[Bmill]{
 		.name "mill",
-		.time 25,
 		.buildtime 50,
-		.costs {
+		.buildcost {
 			[Ggold] 8,
 			[Glumber] 8,
 		},
 		.terrain Tplain,
-		.goods {
+		.prodtime 25,
+		.product {
 			[Gwheat] 2,
 		},
+		.prodcost {0},
 		.upkeep {
 			[Rfood] 1,
 		},
 	},[Bfarm]{
 		.name "farm",
-		.time 25,
 		.buildtime 50,
-		.costs {
+		.buildcost {
 			[Ggold] 8,
 			[Glumber] 4,
 			[Gwheat] 4,
 		},
 		.terrain Tplain,
-		.goods {
+		.prodtime 25,
+		.product {
 			[Gcattle] 2,
+		},
+		.prodcost {
+			[Gwheat] 1,
 		},
 		.upkeep {
 			[Rfood] 1,
@@ -187,81 +197,95 @@ Building buildings[] = {
 		},
 	},[Bquarry]{
 		.name "quarry",
-		.time 25,
 		.buildtime 50,
-		.costs {
+		.buildcost {
 			[Ggold] 5,
 			[Glumber] 2,
 			[Gwheat] 3,
 		},
 		.terrain Tplain,
-		.goods {
+		.prodtime 25,
+		.product {
 			[Gstone] 1,
 		},
+		.prodcost {0},
 		.upkeep {
 			[Rfood] 1,
 		},
 	},[Bsmeltery]{
 		.name "smeltery",
-		.time 25,
 		.buildtime 50,
-		.costs {
+		.buildcost {
 			[Ggold] 12,
 			[Glumber] 6,
 			[Gstone] 4,
 			[Gwood] 2,
 		},
 		.terrain Tplain,
-		.goods {
+		.prodtime 50,
+		.product {
 			[Giron] 1,
+		},
+		.prodcost {
+			[Gwood] 2,
 		},
 		.upkeep {
 			[Rfood] 2,
 		},
 	},[Bforge]{
 		.name "forge",
-		.time 25,
 		.buildtime 50,
-		.costs {
+		.buildcost {
 			[Ggold] 10,
 			[Glumber] 4,
 			[Gstone] 4,
 			[Giron] 2,
 		},
 		.terrain Tplain,
-		.goods {
+		.prodtime 25,
+		.product {
 			[Gtools] 1,
+		},
+		.prodcost {
+			[Gwood] 1,
+			[Giron] 1,
 		},
 		.upkeep {
 			[Rfood] 2,
 		},
 	},[Blapidary]{
 		.name "lapidary",
-		.time 25,
 		.buildtime 50,
-		.costs {
+		.buildcost {
 			[Ggold] 26,
 			[Gstone] 16,
 			[Giron] 14,
 			[Gtools] 14,
 		},
 		.terrain Tplain,
-		.goods {
+		.prodtime 100,
+		.product {
 			[Gjewelry] 1,
+		},
+		.prodcost {
+			[Gwood] 2,
+			[Giron] 2,
+			[Gtools] 2,
 		},
 		.upkeep {
 			[Rfood] 2,
 		},
 	},[Bmarket]{
 		.name "market",
-		.time 25,
 		.buildtime 50,
-		.costs {
+		.buildcost {
 			[Ggold] 10,
 			[Glumber] 10,
 		},
 		.terrain Tplain,
-		.goods {0},
+		.prodtime 0,
+		.product {0},
+		.prodcost {0},
 		.upkeep {
 			[Rgold] 1,
 			[Rfood] 5,

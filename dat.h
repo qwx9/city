@@ -58,11 +58,12 @@ enum{
 };
 struct Building{
 	char *name;
-	int time;
 	int buildtime;
-	int costs[Gtot];
+	int buildcost[Gtot];
+	int prodtime;
+	int product[Gtot];
+	int prodcost[Gtot];
 	int terrain;
-	int goods[Gtot];
 	int upkeep[Rtot];
 };
 extern Building buildings[Btot];
@@ -87,16 +88,25 @@ extern Terrain terrains[Ttot];
 
 enum{
 	Snull,
+	Svoid,
+	Swaitbuild,
 	Sbuild,
-	Swait,
+	Sstarved,
+	Swaitsupply,
 	Sproduce,
 };
 struct Tile{
 	Terrain *t;
-	Building *b;
+	int distance;
 	int stock;
+	Building *b;
 	int state;
-	int clock;
+	int gotsupply;
+	int prodstock[Gtot];
+	vlong clock;
+	vlong prodΔt;
+	vlong supplyΔt;
+	vlong pickupΔt;
 };
 extern Tile *map;
 extern int mapwidth, mapheight;

@@ -6,6 +6,12 @@
 int mapwidth, mapheight;
 Tile *map;
 
+int
+mhdist(int x, int y, int x´, int y´)
+{
+	return abs(x - x´) + abs(y - y´);
+}
+
 void
 loadmap(void)
 {

@@ -45,7 +45,7 @@ spawn(Tile *m, int n)
 static void
 starve(Tile *o)
 {
-	o->state = Swait;
+	o->state = Svoid;
 }
 
 static void
@@ -58,7 +58,7 @@ upkeep(void)
 		return;
 	for(ol=objhead-1; ol>=objs; ol--){
 		o = *ol;
-		if(o->state <= Swait)
+		if(o->state <= Svoid)
 			continue;
 		if(o->b == nil)
 			sysfatal("empty active tile");
@@ -84,35 +84,96 @@ upkeep(void)
 	}
 }
 
+static int
+trypickup(Tile *o)
+{
+	int g;
+
+	if(o->pickupΔt == 0 || o->clock < o->pickupΔt)
+		return 0;
+	for(g=0; g<nelem(goods); g++)
+		stock[g] += o->prodstock[g];
+	o->pickupΔt = 0;
+	return 1;
+}
+
+static int
+trysupply(Tile *o)
+{
+	int g;
+	for(g=0; g<nelem(goods); g++)
+		if(o->b->prodcost[g] > stock[g])
+			return 0;
+	for(g=0; g<nelem(goods); g++)
+		if(o->b->prodcost[g] > 0)
+			stock[g] -= o->b->prodcost[g];
+	o->supplyΔt = o->clock + o->distance;
+	return 1;
+}
+
 static void
 updateobj(void)
 {
+	int g;
 	Tile *o, **ol;
 
 	for(ol=objhead-1; ol>=objs; ol--){
 		o = *ol;
+		o->clock++;
 		switch(o->state){
+		case Swaitbuild:
+			if(o->clock >= o->distance){
+				o->clock = 0;
+				o->state = Sbuild;
+			}
+			break;
 		case Sbuild:
-			/* 
-			call for supplies, start travel towards building site
-			done?
-			start production
-			*/
+			if(o->clock >= o->b->buildtime){
+				o->clock = 0;
+				o->state = o->b->prodtime > 0 ? Sstarved : Svoid;
+			}
+			break;
+		case Sstarved:
+			trypickup(o);
+			if(trysupply(o))
+				o->state = Swaitsupply;
+			break;
+		case Swaitsupply:
+			trypickup(o);
+			if(o->clock >= o->supplyΔt){
+				o->gotsupply = 0;
+				o->supplyΔt = 0;
+				o->prodΔt = o->clock + o->b->prodtime;
+				o->state = Sproduce;
+			}
+			break;
 		case Sproduce:
-			/*
-			call for supplies
-			enough supplies? else wait until next tick (loop)
-			decrement stocks, start traveling from townhall
-			reached building?
-			increment supplies
-			begin production
-			while producing, if we can call for supplies earlier to restart immediately, do it
-			finished producing?
-			start travel towards building
-			reached building?
-			call for pickup
-			loop
-			*/
+			if(!o->gotsupply){
+				if(o->supplyΔt == 0){
+					if(!trysupply(o))
+						return;
+					for(g=0; g<nelem(goods); g++)
+						if(o->b->prodcost[g] > stock[g])
+							break;
+				}else if(o->clock >= o->supplyΔt){
+					o->gotsupply = 1;
+					o->supplyΔt = 0;
+				}
+			}
+			trypickup(o);
+			if(o->clock >= o->prodΔt){
+				o->pickupΔt = o->clock + o->distance * 2;
+				if(!o->gotsupply){
+					if(o->supplyΔt == 0)
+						o->state = Sstarved;
+					else
+						o->state = Swaitsupply;
+				}else{
+					o->prodΔt += o->b->prodtime;
+					o->gotsupply = 0;
+				}
+			}
+			break;
 		default: break;
 		}
 	}
@@ -125,16 +186,35 @@ step(void)
 	updateobj();
 }
 
+static void
+calcdists(int n)
+{
+	int x, y, x´, y´;
+	Tile *o;
+
+	x = n % mapwidth;
+	y = n / mapheight;
+	for(o=map, x´=0, y´=0; o<map+mapwidth*mapheight; o++, x´++){
+		o->distance = mhdist(x, y, x´, y´);
+		if(x´ == mapwidth){
+			x´ = 0;
+			y´++;
+		}
+	}
+}
+
 void
 init(void)
 {
-	int i;
+	int i, n;
 
 	initmap();
 	maxobj = mapwidth * mapheight;
 	objs = emalloc(maxobj * sizeof *objs);
 	objhead = objs;
-	spawn(map + nrand(maxobj), Btownhall);
+	n = nrand(maxobj);
+	spawn(map + n, Btownhall);
+	calcdists(n);
 	for(i=0; i<nelem(initialstock); i++){
 		stock[i] = initialstock[i];
 		rstock[goods[i].resource] += stock[i];
