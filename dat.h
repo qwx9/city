@@ -107,6 +107,7 @@ struct Tile{
 	vlong prodΔt;
 	vlong supplyΔt;
 	vlong pickupΔt;
+	int stale;
 };
 extern Tile *map;
 extern int mapwidth, mapheight;
@@ -114,8 +115,9 @@ extern int mapwidth, mapheight;
 enum{
 	Te9 = 1000000000,
 	Te6 = 1000000,
-	THz = 5,
+	SimHz = 5,
+	AnimHz = 1,
 	Travelticks = 10,
 };
-extern int tdiv;
 extern vlong clock;
+extern int paused;

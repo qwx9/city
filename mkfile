@@ -4,6 +4,7 @@ TARG=city
 OFILES=\
 	city.$O\
 	defs.$O\
+	drw.$O\
 	map.$O\
 	sim.$O\
 

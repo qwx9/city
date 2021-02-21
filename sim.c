@@ -1,7 +1,15 @@
 #include <u.h>
 #include <libc.h>
+#include <thread.h>
 #include "dat.h"
 #include "fns.h"
+
+extern QLock drwlock;
+
+int paused;
+vlong clock;
+
+static int tdiv;
 
 static Tile **objs, **objhead;
 static int maxobj;
@@ -179,11 +187,44 @@ updateobj(void)
 	}
 }
 
-void
+static void
 step(void)
 {
+	if(paused)
+		return;
+	qlock(&drwlock);
 	upkeep();
 	updateobj();
+	qunlock(&drwlock);
+}
+
+static void
+simproc(void *)
+{
+	int Δtc;
+	vlong t, t0, dt;
+
+	tdiv = Te9 / SimHz;
+	t0 = nsec();
+	for(;;){
+		step();
+		clock++;
+		t = nsec();
+		Δtc = (t - t0) / tdiv;
+		if(Δtc <= 0)
+			Δtc = 1;
+		t0 += Δtc * tdiv;
+		dt = (t0 - t) / Te6;
+		if(dt > 0)
+			sleep(dt);
+	}
+}
+
+void
+startsim(void)
+{
+	if(proccreate(simproc, nil, 8192) < 0)
+		sysfatal("init: %r");
 }
 
 static void
@@ -208,6 +249,7 @@ init(void)
 {
 	int i, n;
 
+	srand(time(nil));
 	initmap();
 	maxobj = mapwidth * mapheight;
 	objs = emalloc(maxobj * sizeof *objs);

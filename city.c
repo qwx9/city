@@ -1,10 +1,16 @@
 #include <u.h>
 #include <libc.h>
+#include <thread.h>
+#include <draw.h>
+#include <mouse.h>
+#include <keyboard.h>
 #include "dat.h"
 #include "fns.h"
 
-int tdiv;
-vlong clock;
+static int tdiv;
+static Keyboardctl *kc;
+static Mousectl *mc;
+static Channel *tmc;
 
 void *
 emalloc(ulong n)
@@ -17,34 +23,68 @@ emalloc(ulong n)
 	return p;
 }
 
-void
-input(void)
+static void
+timeproc(void *)
 {
-
+	tdiv = 1000 / AnimHz;
+	for(;;){
+		sleep(tdiv);
+		nbsendul(tmc, 0);
+	}
 }
 
 void
-main(int argc, char **argv)
+threadmain(int argc, char **argv)
 {
-	vlong t, t0, dt, Δtc;
+	Rune r;
+	Mouse mo;
 
 	ARGBEGIN{
 	}ARGEND
-	srand(time(nil));
 	init();
-	tdiv = Te9 / THz;
-	t0 = nsec();
+	initdrw();
+	if((kc = initkeyboard(nil)) == nil)
+		sysfatal("initkeyboard: %r");
+	if((mc = initmouse(nil, screen)) == nil)
+		sysfatal("initmouse: %r");
+	if((tmc = chancreate(sizeof(ulong), 0)) == nil)
+		sysfatal("chancreate: %r");
+	if(proccreate(timeproc, nil, 8192) < 0)
+		sysfatal("init: %r");
+	startsim();
+	enum{
+		Aresize,
+		Amouse,
+		Akbd,
+		Aanim,
+	};
+	Alt a[] = {
+		{mc->resizec, nil, CHANRCV},
+		{mc->c, &mc->Mouse, CHANRCV},
+		{kc->c, &r, CHANRCV},
+		{tmc, nil, CHANRCV},
+		{nil, nil, CHANEND}
+	};
 	for(;;){
-		input();
-		step();
-		clock++;
-		t = nsec();
-		Δtc = (t - t0) / tdiv;
-		if(Δtc <= 0)
-			Δtc = 1;
-		t0 += Δtc * tdiv;
-		dt = (t0 - t) / Te6;
-		if(dt > 0)
-			sleep(dt);
+		switch(alt(a)){
+		case Aresize:
+			if(getwindow(display, Refnone) < 0)
+				sysfatal("resize failed: %r");
+			mo = mc->Mouse;
+			resetdraw();
+			break;
+		case Amouse:
+			break;
+		case Akbd:
+			switch(r){
+			case Kdel:
+			case 'q': threadexitsall(nil);
+			case ' ': paused ^= 1; break;
+			}
+			break;
+		case Aanim:
+			updatedraw();
+			break;
+		}
 	}
 }
