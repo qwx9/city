@@ -52,6 +52,7 @@ threadmain(int argc, char **argv)
 	if(proccreate(timeproc, nil, 8192) < 0)
 		sysfatal("init: %r");
 	startsim();
+	mo.xy = ZP;
 	enum{
 		Aresize,
 		Amouse,
