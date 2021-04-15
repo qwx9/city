@@ -74,6 +74,8 @@ threadmain(int argc, char **argv)
 			resetdraw();
 			break;
 		case Amouse:
+			if(eqpt(mo.xy, ZP))
+				mo = mc->Mouse;
 			break;
 		case Akbd:
 			switch(r){
