@@ -23,6 +23,18 @@ emalloc(ulong n)
 	return p;
 }
 
+int
+max(int a, int b)
+{
+	return a > b ? a : b;
+}
+
+int
+min(int a, int b)
+{
+	return a < b ? a : b;
+}
+
 static void
 timeproc(void *)
 {
@@ -77,6 +89,8 @@ threadmain(int argc, char **argv)
 		case Amouse:
 			if(eqpt(mo.xy, ZP))
 				mo = mc->Mouse;
+			if(mc->buttons & 1<<0)
+				mouseselect(mc->xy);
 			break;
 		case Akbd:
 			switch(r){

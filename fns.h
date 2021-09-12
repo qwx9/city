@@ -5,5 +5,7 @@ int	mhdist(int, int, int, int);
 void	startsim(void);
 void	initdrw(void);
 void	resetdraw(void);
-void	redraw(void);
 void	updatedraw(void);
+void	mouseselect(Point);
+int	min(int, int);
+int	max(int, int);

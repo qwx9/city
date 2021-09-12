@@ -100,6 +100,7 @@ Resource resources[] = {
 Building buildings[] = {
 	[Btownhall]{
 		.name "townhall",
+		.abbr "H",
 		.buildtime 1000,
 		.buildcost {0},
 		.terrain Tplain,
@@ -111,6 +112,7 @@ Building buildings[] = {
 		},
 	},[Bfishyard]{
 		.name "fishyard",
+		.abbr "F",
 		.buildtime 50,
 		.buildcost {
 			[Ggold] 5,
@@ -127,6 +129,7 @@ Building buildings[] = {
 		},
 	},[Bcarpentry]{
 		.name "carpentry",
+		.abbr "C",
 		.buildtime 50,
 		.buildcost {
 			[Ggold] 3,
@@ -143,6 +146,7 @@ Building buildings[] = {
 		},
 	},[Bsawmill]{
 		.name "sawmill",
+		.abbr "L",
 		.buildtime 50,
 		.buildcost {
 			[Ggold] 10,
@@ -161,6 +165,7 @@ Building buildings[] = {
 		},
 	},[Bmill]{
 		.name "mill",
+		.abbr "M",
 		.buildtime 50,
 		.buildcost {
 			[Ggold] 8,
@@ -177,6 +182,7 @@ Building buildings[] = {
 		},
 	},[Bfarm]{
 		.name "farm",
+		.abbr "B",
 		.buildtime 50,
 		.buildcost {
 			[Ggold] 8,
@@ -197,6 +203,7 @@ Building buildings[] = {
 		},
 	},[Bquarry]{
 		.name "quarry",
+		.abbr "Q",
 		.buildtime 50,
 		.buildcost {
 			[Ggold] 5,
@@ -214,6 +221,7 @@ Building buildings[] = {
 		},
 	},[Bsmeltery]{
 		.name "smeltery",
+		.abbr "S",
 		.buildtime 50,
 		.buildcost {
 			[Ggold] 12,
@@ -234,6 +242,7 @@ Building buildings[] = {
 		},
 	},[Bforge]{
 		.name "forge",
+		.abbr "F",
 		.buildtime 50,
 		.buildcost {
 			[Ggold] 10,
@@ -255,6 +264,7 @@ Building buildings[] = {
 		},
 	},[Blapidary]{
 		.name "lapidary",
+		.abbr "L",
 		.buildtime 50,
 		.buildcost {
 			[Ggold] 26,
@@ -277,6 +287,7 @@ Building buildings[] = {
 		},
 	},[Bmarket]{
 		.name "market",
+		.abbr "G",
 		.buildtime 50,
 		.buildcost {
 			[Ggold] 10,
@@ -295,36 +306,43 @@ Building buildings[] = {
 Terrain terrains[] = {
 	[Tplain]{
 		.name "plain",
+		.abbr "p",
 		.good -1,
 		.initialstock 0,
 		.yield 0,
 	},[Twoods]{
 		.name "woods",
+		.abbr "w",
 		.good Gwood,
 		.initialstock 9001,
 		.yield 1,
 	},[Tpond]{
 		.name "pond",
+		.abbr "p",
 		.good Gfish,
 		.initialstock 9001,
 		.yield 1,
 	},[Tcrop]{
 		.name "crop",
+		.abbr "c",
 		.good Gwheat,
 		.initialstock 800,
 		.yield 0.8,
 	},[Tmountain]{
 		.name "mountain",
+		.abbr "m",
 		.good Gstone,
 		.initialstock 9001,
 		.yield 0.8,
 	},[Tironvein]{
 		.name "ironvein",
+		.abbr "i",
 		.good Giron,
 		.initialstock 9001,
 		.yield 0.5,
 	},[Tgoldvein]{
 		.name "goldvein",
+		.abbr "g",
 		.good Ggold,
 		.initialstock 9001,
 		.yield 0.3,

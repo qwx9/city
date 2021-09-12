@@ -58,6 +58,7 @@ enum{
 };
 struct Building{
 	char *name;
+	char *abbr;
 	int buildtime;
 	int buildcost[Gtot];
 	int prodtime;
@@ -80,6 +81,7 @@ enum{
 };
 struct Terrain{
 	char *name;
+	char *abbr;
 	int good;
 	int initialstock;
 	double yield;

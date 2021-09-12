@@ -19,18 +19,6 @@ enum{
 };
 static int stock[Gtot], rstock[Rtot];
 
-int
-max(int a, int b)
-{
-	return a > b ? a : b;
-}
-
-int
-min(int a, int b)
-{
-	return a < b ? a : b;
-}
-
 static void
 spawn(Tile *m, int n)
 {
