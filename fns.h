@@ -3,6 +3,7 @@ void	init(void);
 void	initmap(void);
 int	mhdist(int, int, int, int);
 void	startsim(void);
+void	readfs(void);
 void	initdrw(void);
 void	resetdraw(void);
 void	updatedraw(void);

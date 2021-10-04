@@ -1,8 +1,18 @@
+typedef struct Pic Pic;
 typedef struct Resource Resource;
 typedef struct Good Good;
 typedef struct Building Building;
 typedef struct Terrain Terrain;
 typedef struct Tile Tile;
+
+enum{
+	Tilesz = 32,
+};
+struct Pic{
+	int picw;
+	int pich;
+	u32int *pic;
+};
 
 enum{
 	Gfish,
@@ -66,6 +76,7 @@ struct Building{
 	int prodcost[Gtot];
 	int terrain;
 	int upkeep[Rtot];
+	Pic;
 };
 extern Building buildings[Btot];
 
@@ -85,6 +96,7 @@ struct Terrain{
 	int good;
 	int initialstock;
 	double yield;
+	Pic;
 };
 extern Terrain terrains[Ttot];
 

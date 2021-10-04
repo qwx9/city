@@ -63,6 +63,7 @@ threadmain(int argc, char **argv)
 		sysfatal("chancreate: %r");
 	if(proccreate(timeproc, nil, 8192) < 0)
 		sysfatal("init: %r");
+	readfs();
 	startsim();
 	mo.xy = ZP;
 	enum{
