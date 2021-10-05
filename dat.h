@@ -9,10 +9,11 @@ enum{
 	Tilesz = 32,
 };
 struct Pic{
-	int picw;
-	int pich;
+	Point picsz;
 	u32int *pic;
 };
+
+extern int scale;
 
 enum{
 	Gfish,

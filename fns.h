@@ -7,6 +7,7 @@ void	readfs(void);
 void	initdrw(void);
 void	resetdraw(void);
 void	updatedraw(void);
+void	flushfb(void);
 void	mouseselect(Point);
 int	min(int, int);
 int	max(int, int);

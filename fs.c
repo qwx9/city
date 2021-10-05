@@ -27,8 +27,7 @@ loadpic(char *name, int dim, Pic *pic)
 		sysfatal("loadpic %s: inappropriate image format", f);
 	free(f);
 	n = dim * dim;
-	pic->picw = dim;
-	pic->pich = dim;
+	pic->picsz = Pt(dim, dim);
 	pic->pic = emalloc(n * sizeof *pic->pic);
 	n *= i->depth / 8;
 	buf = emalloc(n);

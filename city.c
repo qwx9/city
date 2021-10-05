@@ -64,6 +64,7 @@ threadmain(int argc, char **argv)
 	if(proccreate(timeproc, nil, 8192) < 0)
 		sysfatal("init: %r");
 	readfs();
+	resetdraw();
 	startsim();
 	mo.xy = ZP;
 	enum{
@@ -98,6 +99,19 @@ threadmain(int argc, char **argv)
 			case Kdel:
 			case 'q': threadexitsall(nil);
 			case ' ': paused ^= 1; break;
+			case '+':
+			case '=':
+				if(scale < 16){
+					scale++;
+					resetdraw();
+				}
+				break;
+			case '-':
+				if(scale > 1){
+					scale--;
+					resetdraw();
+				}
+				break;
 			}
 			break;
 		case Aanim:
