@@ -2,11 +2,14 @@
 BIN=$home/bin/$objtype
 TARG=city
 OFILES=\
+	build.$O\
 	city.$O\
+	data.$O\
 	defs.$O\
 	drw.$O\
 	fs.$O\
 	map.$O\
+	menu.$O\
 	sim.$O\
 
 HFILES=dat.h fns.h

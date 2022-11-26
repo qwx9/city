@@ -7,9 +7,10 @@
 #include "dat.h"
 #include "fns.h"
 
+Mousectl *mc;
+Keyboardctl *kc;
+
 static int tdiv;
-static Keyboardctl *kc;
-static Mousectl *mc;
 static Channel *tmc;
 
 void *
@@ -48,8 +49,10 @@ timeproc(void *)
 void
 threadmain(int argc, char **argv)
 {
+	uint b, bo;
 	Rune r;
 	Mouse mo;
+	Point p;
 
 	ARGBEGIN{
 	}ARGEND
@@ -66,7 +69,9 @@ threadmain(int argc, char **argv)
 	readfs();
 	resetdraw();
 	startsim();
-	mo.xy = ZP;
+	mo.xy = EP;
+	memset(&mo, 0, sizeof mo);
+	bo = 0;
 	enum{
 		Aresize,
 		Amouse,
@@ -88,11 +93,31 @@ threadmain(int argc, char **argv)
 			mo = mc->Mouse;
 			resetdraw();
 			break;
+		/* FIXME: clean up */
 		case Amouse:
-			if(eqpt(mo.xy, ZP))
+			if(eqpt(mo.xy, EP))
 				mo = mc->Mouse;
-			if(mc->buttons & 1<<0)
-				mouseselect(mc->xy);
+			b = mc->buttons;
+			p = s2p(mc->xy);
+			if(eqpt(p, EP) || b == 0){
+				//if(b != 0)
+				//	deselect();
+				mo = mc->Mouse;
+				bo = b;
+				break;
+			}
+			if((b & (1<<0|1<<2)) != 0
+			&& (b & (1<<0|1<<2) != (bo & (1<<0|1<<2)))){
+				mouseselect(p);
+				updatedraw(1);
+			}
+			if((mc->buttons & 1<<2) != 0
+			&& (b & 1<<2) != (bo & 1<<2)){
+				actionmenu(p);
+				updatedraw(1);
+			}
+			mo = mc->Mouse;
+			bo = mo.buttons;
 			break;
 		case Akbd:
 			switch(r){
@@ -115,7 +140,7 @@ threadmain(int argc, char **argv)
 			}
 			break;
 		case Aanim:
-			updatedraw();
+			updatedraw(0);
 			break;
 		}
 	}

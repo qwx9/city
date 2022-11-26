@@ -7,6 +7,16 @@
 int mapwidth, mapheight;
 Tile *map;
 
+Point
+tile2xy(Tile *m)
+{
+	Point p;
+
+	p.x = ((m - map) % mapwidth) * Tilesz;
+	p.y = ((m - map) / mapwidth) * Tilesz;
+	return p;
+}
+
 int
 mhdist(int x, int y, int x´, int y´)
 {

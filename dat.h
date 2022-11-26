@@ -126,6 +126,21 @@ struct Tile{
 };
 extern Tile *map;
 extern int mapwidth, mapheight;
+extern Tile *selected;
+
+extern int stock[Gtot], rstock[Rtot];
+
+typedef int (*Menuptr)(Tile*);
+enum{
+	Cursdef,
+	Curstarget,
+};
+extern void	(*mapdrawfn)(void);
+extern int	(*selectfn)(Tile*);
+extern int repaint;
+extern Menuptr menufn;
+
+extern Point EP;
 
 enum{
 	Te9 = 1000000000,

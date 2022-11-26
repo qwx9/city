@@ -1,7 +1,9 @@
 #include <u.h>
 #include <libc.h>
 #include <draw.h>
+#include <mouse.h>
 #include "dat.h"
+#include "fns.h"
 
 Good goods[] = {
 	[Gfish]{

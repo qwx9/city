@@ -10,21 +10,22 @@ extern QLock drwlock;
 int paused;
 vlong clock;
 
+enum{
+	UpkeepΔt = 150,
+};
+int stock[Gtot], rstock[Rtot];
+
 static int tdiv;
 
 static Tile **objs, **objhead;
 static int maxobj;
 
-enum{
-	UpkeepΔt = 150,
-};
-static int stock[Gtot], rstock[Rtot];
-
-static void
+void
 spawn(Tile *m, int n)
 {
 	Tile **o;
 
+	assert(m != nil);
 	if(objhead - objs >= maxobj)
 		sysfatal("spawn: out of bounds");
 	m->t = terrains + Tplain;

@@ -4,11 +4,13 @@
 #include "dat.h"
 #include "fns.h"
 
+Point EP = {-1,-1};
+
 int scale = 1;
 Point pan;
+void (*mapdrawfn)(void);
 QLock drwlock;
-
-static Tile *selected;
+int repaint;
 
 enum{
 	Cbg,
@@ -17,11 +19,11 @@ enum{
 };
 static Image *cols[Cend];
 
-static Rectangle fbr, scrwin, hudr;
+Rectangle scrwin;
+static Rectangle fbr, hudr;
 static Point scrofs, tlwin, fbbufr;
 static Image *fb;
 static u32int *fbbuf;
-static int doupdate;
 
 static Image *
 eallocimage(Rectangle r, ulong chan, int repl, ulong col)
@@ -31,6 +33,30 @@ eallocimage(Rectangle r, ulong chan, int repl, ulong col)
 	if((i = allocimage(display, r, chan, repl, col)) == nil)
 		sysfatal("allocimage: %r");
 	return i;
+}
+
+Point
+s2p(Point p)
+{
+	if(!ptinrect(p, scrwin))
+		return EP;
+	return divpt(subpt(p, scrwin.min), scale);
+}
+
+Tile *
+p2t(Point p)
+{
+	p = divpt(p, Tilesz);
+	assert(p.x >= 0 && p.x < mapwidth && p.y >= 0 && p.y < mapheight);
+	return map + p.y * mapwidth + p.x;
+}
+
+Tile *
+s2t(Point p)
+{
+	if(eqpt(p, EP))
+		return nil;
+	return p2t(p);
 }
 
 static int
@@ -105,30 +131,30 @@ drawpic(Point pp, Pic *pic)
 	}
 }
 
-static Point
-tile2xy(Tile *m)
+void
+composeat(Tile *m, u32int c)
 {
-	Point p;
+	int k, n, x, w;
+	u32int v, *pp;
 
-	p.x = ((m - map) % mapwidth) * Tilesz;
-	p.y = ((m - map) / mapwidth) * Tilesz;
-	return p;
-}
-
-static Point
-scr2tilexy(Point p)
-{
-	p = divpt(subpt(p, scrwin.min), scale * Tilesz);
-	assert(p.x < tlwin.x && p.x >= 0 && p.y < tlwin.y && p.y >= 0);
-	return p;
-}
-
-static Tile *
-scr2tile(Point p)
-{
-	assert(ptinrect(p, scrwin));
-	p = scr2tilexy(p);
-	return map + p.y * mapwidth + p.x;
+	w = fbr.max.x * fbr.max.y / scale;
+	pp = fbbuf + (m-map) / mapwidth * w
+		+ (m-map) % mapwidth * Tilesz * scale;
+	n = Tilesz;
+	w = (fbr.max.x / scale - Tilesz) * scale;
+	while(n-- > 0){
+		x = Tilesz;
+		while(x-- > 0){
+			v = *pp;
+			v = (v & 0xff0000) + (c & 0xff0000) >> 1 & 0xff0000
+				| (v & 0xff00) + (c & 0xff00) >> 1 & 0xff00
+				| (v & 0xff) + (c & 0xff) >> 1 & 0xff;
+			k = scale;
+			while(k-- > 0)
+				*pp++ = v;
+		}
+		pp += w;
+	}
 }
 
 static void
@@ -144,6 +170,42 @@ drawhud(void)
 }
 
 static void
+drawmenuselected(void)
+{
+	int i, n;
+	char s[256], *sp;
+	Point p;
+	Building *b;
+
+	if(selected == nil)
+		return;
+	assert(selected >= map && selected < map + mapwidth * mapheight);
+	b = buildings + (selected - map);
+	if(b >= buildings + nelem(buildings)){
+		fprint(2, "nope\n");
+		return;
+	}
+	p = addpt(hudr.min, Pt(0, font->height));
+	sp = s;
+	sp = seprint(sp, s+sizeof s, "%s time %d cost ",
+		b->name, b->buildtime);
+	for(i=0, n=0; i<nelem(b->product); i++)
+		if(b->buildcost[i] > 0){
+			sp = seprint(sp, s+sizeof s, "%s%d %s",
+				n > 0 ? "," : "", b->buildcost[i], goods[i].name);
+			n++;
+		}
+	sp = seprint(sp, s+sizeof s, " product ");
+	for(i=0, n=0; i<nelem(b->product); i++)
+		if(b->product[i] > 0){
+			sp = seprint(sp, s+sizeof s, "%s%d %s",
+				n > 0 ? "," : "", b->product[i], goods[i].name);
+			n++;
+		}
+	string(screen, p, cols[Ctext], ZP, font, s);
+}
+
+static void
 drawtile(Tile *m)
 {
 	Pic *pic;
@@ -153,54 +215,76 @@ drawtile(Tile *m)
 }
 
 void
-updatedraw(void)
+drawbuildings(void)
+{
+	int x, y;
+	Tile *m;
+	Building *b;
+
+	for(y=0, m=map, b=buildings; y<tlwin.y; y++){
+		for(x=0; x<tlwin.x; x++, m++, b++){
+			if(b >= buildings + nelem(buildings))
+				return;
+			drawpic(tile2xy(m), &b->Pic);
+			if(!couldbuild(b))
+				composeat(m, 0x555555);
+			if(m->stale){
+				m->stale = 0;
+				repaint = 1;
+			}
+		}
+		m += mapwidth - tlwin.x;
+	}
+}
+
+static void
+drawmap(void)
 {
 	int x, y;
 	Tile *m;
 
-	qlock(&drwlock);
 	for(y=0, m=map; y<tlwin.y; y++){
 		for(x=0; x<tlwin.x; x++, m++)
 			if(m->stale){
 				drawtile(m);
 				m->stale = 0;
-				doupdate = 1;
+				repaint = 1;
 			}
 		m += mapwidth - tlwin.x;
 	}
-	qunlock(&drwlock);
-	if(!doupdate)
-		return;
-	flushfb();
-	doupdate = 0;
 }
 
 void
-mouseselect(Point p)
+drawbuildmenu(void)
 {
-	doupdate = 1;
-	if(!ptinrect(p, scrwin)){
-		selected = nil;
-		return;
-	}
-	selected = scr2tile(p);
-	doupdate = 1;
-	updatedraw();
+	drawbuildings();
+	drawmenuselected();
 }
 
 static void
-redraw(void)
+redrawcanvas(void)
 {
 	int x, y;
 	Tile *m;
 
-	draw(fb, fb->r, display->black, nil, ZP);
+	memset(fbbuf, 0, fbbufr.x * fbbufr.y * sizeof *fbbuf);
 	for(y=0, m=map; y<tlwin.y; y++){
 		for(x=0; x<tlwin.x; x++, m++)
 			m->stale = 1;
 		m += mapwidth - tlwin.x;
 	}
-	updatedraw();
+}
+
+void
+updatedraw(int all)
+{
+	qlock(&drwlock);
+	if(all || repaint)
+		redrawcanvas();
+	(mapdrawfn != nil ? mapdrawfn : drawmap)();
+	qunlock(&drwlock);
+	flushfb();
+	repaint = 0;
 }
 
 void
@@ -209,6 +293,7 @@ flushfb(void)
 	uchar *p;
 	Rectangle r, r2;
 
+	lockdisplay(display);
 	p = (uchar *)fbbuf;
 	if(scale == 1){
 		loadimage(fb, fb->r, p, fbbufr.x * fbbufr.y * sizeof *fbbuf);
@@ -225,6 +310,7 @@ flushfb(void)
 	}
 	drawhud();
 	flushimage(display, 1);
+	unlockdisplay(display);
 }
 
 void
@@ -261,8 +347,7 @@ resetdraw(void)
 	fbbuf = emalloc(fbbufr.x * fbbufr.y * sizeof *fbbuf);
 	if(!eqpt(scrofs, ZP))
 		draw(screen, screen->r, cols[Cbg], nil, ZP);
-	doupdate = 1;
-	redraw();
+	updatedraw(1);
 }
 
 void
@@ -270,6 +355,8 @@ initdrw(void)
 {
 	if(initdraw(nil, nil, "city") < 0)
 		sysfatal("initdraw: %r");
+	display->locking = 1;
+	unlockdisplay(display);
 	cols[Cbg] = eallocimage(Rect(0,0,1,1), screen->chan, 1, 0x777777FF);
 	cols[Ctext] = display->black;
 	fmtinstall('P', Pfmt);

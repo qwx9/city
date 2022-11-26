@@ -53,8 +53,8 @@ readimg(void)
 
 	for(t=terrains; t<terrains+nelem(terrains); t++)
 		loadpic(t->name, Tilesz, &t->Pic);
-	b = buildings + Btownhall;
-	loadpic(b->name, Tilesz, &b->Pic);
+	for(b=buildings; b<buildings+nelem(buildings); b++)
+		loadpic(b->name, Tilesz, &b->Pic);
 }
 
 void
